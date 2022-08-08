@@ -1,4 +1,4 @@
-namespace Round_Changer;
+namespace TimeTraveler;
 
 public static class ModHelperData
 {
