@@ -7,4 +7,5 @@ public static class ModHelperData
     public const string Version = "2.0.0";
     public const string RepoOwner = "Commander-Cat101";
     public const string RepoName = "TimeTraveler";
+    public const string Author = "Commander__Cat";
 }
