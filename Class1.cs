@@ -1,16 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Assets.Scripts.Models.Towers;
-using Assets.Scripts.Models.Towers.Behaviors;
-using Assets.Scripts.Models.Towers.Behaviors.Abilities;
-using Assets.Scripts.Models.Towers.Behaviors.Abilities.Behaviors;
-using Assets.Scripts.Models.Towers.Behaviors.Emissions;
-using Assets.Scripts.Unity;
-using Assets.Scripts.Unity.Display;
-using Assets.Scripts.Unity.Towers.Behaviors;
 using BTD_Mod_Helper;
 using BTD_Mod_Helper.Api.Display;
 using BTD_Mod_Helper.Api.Enums;
@@ -18,10 +10,20 @@ using BTD_Mod_Helper.Api.Towers;
 using BTD_Mod_Helper.Extensions;
 using MelonLoader;
 using TimeTraveler.Displays.Projectiles;
+using Il2CppAssets.Scripts.Models.Towers;
+using Il2CppAssets.Scripts.Models.Towers.Behaviors;
+using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
+using Il2CppAssets.Scripts.Models.TowerSets;
+using Il2CppAssets.Scripts.Unity;
+using Il2CppAssets.Scripts.Unity.Display;
+using Il2CppAssets.Scripts.Models.Towers.Behaviors.Attack;
+using Il2CppAssets.Scripts.Models.Towers.Behaviors.Abilities.Behaviors;
+using Il2CppAssets.Scripts.Models.Towers.Behaviors.Abilities;
 
 [assembly: MelonModInfo(typeof(TemplateMod.Main), "The TIME TRAVELER", "2.0.0", "Commander__Cat")]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
-namespace TemplateMod
+
+namespace T
 {
     public class Main : BloonsTD6Mod
     {
@@ -49,7 +51,7 @@ namespace TimeTraveler.Displays.Projectiles
         }
     }
 }
-namespace TimeTraveler.Displays.Tier5
+namespace TimeTravelerTower.Displays.Tier5
 {
     public class TimeTraveler500 : ModTowerDisplay<TimeTraveler>
     {
@@ -110,20 +112,20 @@ namespace TimeTraveler.Displays.Tier5
         }
     }
 }
-namespace TimeTraveler
+namespace TimeTravelerTower
 {
 
     public class TimeTraveler : ModTower
     {
 
-        public override string TowerSet => TowerSetType.Primary;
+        public override TowerSet TowerSet => TowerSet.Primary;
         public override string BaseTower => TowerType.EngineerMonkey;
         public override int Cost => 100; 
         public override int TopPathUpgrades => 5;
         public override int MiddlePathUpgrades => 5;
         public override int BottomPathUpgrades => 5;
         public override string Description => "After 15 years of work the engineer monkey has created a time machine to see the past, present, and future *Useless without upgrades";
-
+        public override ParagonMode ParagonMode => ParagonMode.Base555;
         public override void ModifyBaseTowerModel(TowerModel towerModel)
         {
 
@@ -157,7 +159,7 @@ namespace TimeTraveler
     }
 
 }
-namespace TimeTraveler.Upgrades.TopPath
+namespace TimeTravelerTower.Upgrades.TopPath
 {
     public class AdvancedWeaponry : ModUpgrade<TimeTraveler>    
     {
@@ -285,7 +287,7 @@ namespace TimeTraveler.Upgrades.TopPath
         }
     }
 }
-namespace TimeTraveler.Upgrades.MiddlePath
+namespace TimeTravelerTower.Upgrades.MiddlePath
 {
     public class WorldsFirstSpear : ModUpgrade<TimeTraveler>
     {
@@ -343,7 +345,7 @@ namespace TimeTraveler.Upgrades.MiddlePath
         public override int Tier => 4;
         public override int Cost => 3640;
 
-        public override string Description => "Ability: Sends a pet dinosaur flying towards the bloons"; 
+        public override string Description => "Ability: Sends a pet dinosaur flying towards the bloons";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {
@@ -381,97 +383,97 @@ namespace TimeTraveler.Upgrades.MiddlePath
             attackAbil.attacks[0].weapons[0].projectile.pierce = 1000;
             towerModel.GetBehavior<AbilityModel>().cooldown = 10f;
         }
-    }
-    public class PowerPunch : ModUpgrade<TimeTraveler>
-    {
-        public override string Portrait => "TimeTraveler-Portrait";
-        public override int Path => BOTTOM;
-        public override int Tier => 1;
-        public override int Cost => 360;
-        public override string Description => "The time traveler punches bloons with their fists";
-
-        public override void ApplyUpgrade(TowerModel towerModel)
+        public class PowerPunch : ModUpgrade<TimeTraveler>
         {
-            var attackModel = towerModel.GetAttackModel();
-            attackModel.weapons[0] = Game.instance.model.GetTowerFromId("Sauda 4").GetAttackModel().weapons[0].Duplicate();
-            attackModel.weapons[0].Rate = .80f;
-            towerModel.range = 40f;
-            attackModel.range = 40f;
-        }
-    }
-    public class Looting : ModUpgrade<TimeTraveler>
-    {
-        public override string Portrait => "TimeTraveler-Portrait";
-        public override int Path => BOTTOM;
-        public override int Tier => 2;
-        public override int Cost => 640;
-        public override string Description => "The time traveler now gives 50 cash a round";
+            public override string Portrait => "TimeTraveler-Portrait";
+            public override int Path => BOTTOM;
+            public override int Tier => 1;
+            public override int Cost => 360;
+            public override string Description => "The time traveler punches bloons with their fists";
 
-        public override void ApplyUpgrade(TowerModel towerModel)
-        {
-            var attackModel = towerModel.GetAttackModel();
-            attackModel.weapons[0].Rate = .70f;
-            towerModel.range = 45f;
-            attackModel.range = 45f;
-            towerModel.AddBehavior(new PerRoundCashBonusTowerModel("merchantmen_pirate_crew", 50.0f, 0.0f, 1.0f, CreatePrefabReference("80178409df24b3b479342ed73cffb63d"), false));
-        }
-    }
-    public class RagingRoar : ModUpgrade<TimeTraveler>
-    {
-        public override string Portrait => "TimeTraveler-Portrait";
-        public override int Path => BOTTOM;
-        public override int Tier => 3;
-        public override int Cost => 1670;
-        public override string Description => "Raging roar makes monkeys attack faster";
-
-        public override void ApplyUpgrade(TowerModel towerModel)
-        {
-            var attackModel = towerModel.GetAttackModel();
-            
-            towerModel.AddBehavior(new RateSupportModel("RateSupportModel_Support_JungleDrums", 0.70f, true, "Village:Rate", false, 1, null, "JungleDrumsBuff", "BuffIconVillage2xx"));
-        }
-    }
-    public class ExtraLoot : ModUpgrade<TimeTraveler>
-    {
-        public override string Portrait => "TimeTraveler-Portrait";
-        public override int Path => BOTTOM;
-        public override int Tier => 4;
-        public override int Cost => 4890;
-        public override string Description => "Pirate Alliances with the merchant men give them more money gain";
-
-        public override void ApplyUpgrade(TowerModel towerModel)
-        {
-            var attackModel = towerModel.GetAttackModel();
-            attackModel.weapons[0] = Game.instance.model.GetTowerFromId("Sauda 10").GetAttackModel().weapons[0].Duplicate();
-            towerModel.AddBehavior(new CentralMarketBuffModel("ExtraLootBuffModel_", 1.5f, "CentralMarketBuff", "CentralMarketBuff", "BuffIconBananaFarmxx4", 3));
-            towerModel.GetBehavior<RateSupportModel>().multiplier = .50f;
-            towerModel.GetBehavior<PerRoundCashBonusTowerModel>().cashPerRound = 100f;
-        }
-    }
-    public class PowerCannon : ModUpgrade<TimeTraveler>
-    {
-        public override string Portrait => "TimeTraveler-Portrait";
-        public override int Path => BOTTOM;
-        public override int Tier => 5;
-        public override int Cost => 27000;
-        public override string Description => "Gains a extra power cannon attack";
-
-        public override void ApplyUpgrade(TowerModel towerModel)
-        {
-            var attackModel = towerModel.GetAttackModel();
-            var cannon = Game.instance.model.GetTowerFromId("BombShooter-500").GetAttackModel().Duplicate();
-            cannon.range = towerModel.range;
-            cannon.name = "Cannon_Weapon";
-            towerModel.AddBehavior(cannon);
-            foreach (var attacks in towerModel.GetAttackModels())
+            public override void ApplyUpgrade(TowerModel towerModel)
             {
-                if (attacks.name.Contains("Cannon"))
+                var attackModel = towerModel.GetAttackModel();
+                attackModel.weapons[0] = Game.instance.model.GetTowerFromId("Sauda 4").GetAttackModel().weapons[0].Duplicate();
+                attackModel.weapons[0].Rate = .80f;
+                towerModel.range = 40f;
+                attackModel.range = 40f;
+            }
+        }
+        public class Looting : ModUpgrade<TimeTraveler>
+        {
+            public override string Portrait => "TimeTraveler-Portrait";
+            public override int Path => BOTTOM;
+            public override int Tier => 2;
+            public override int Cost => 640;
+            public override string Description => "The time traveler now gives 50 cash a round";
+
+            public override void ApplyUpgrade(TowerModel towerModel)
+            {
+                var attackModel = towerModel.GetAttackModel();
+                attackModel.weapons[0].Rate = .70f;
+                towerModel.range = 45f;
+                attackModel.range = 45f;
+                towerModel.AddBehavior(new PerRoundCashBonusTowerModel("merchantmen_pirate_crew", 50.0f, 0.0f, 1.0f, CreatePrefabReference("80178409df24b3b479342ed73cffb63d"), false));
+            }
+        }
+        public class RagingRoar : ModUpgrade<TimeTraveler>
+        {
+            public override string Portrait => "TimeTraveler-Portrait";
+            public override int Path => BOTTOM;
+            public override int Tier => 3;
+            public override int Cost => 1670;
+            public override string Description => "Raging roar makes monkeys attack faster";
+
+            public override void ApplyUpgrade(TowerModel towerModel)
+            {
+                var attackModel = towerModel.GetAttackModel();
+
+                towerModel.AddBehavior(new RateSupportModel("RateSupportModel_Support_JungleDrums", 0.70f, true, "Village:Rate", false, 1, null, "JungleDrumsBuff", "BuffIconVillage2xx"));
+            }
+        }
+        public class ExtraLoot : ModUpgrade<TimeTraveler>
+        {
+            public override string Portrait => "TimeTraveler-Portrait";
+            public override int Path => BOTTOM;
+            public override int Tier => 4;
+            public override int Cost => 4890;
+            public override string Description => "Pirate Alliances with the merchant men give them more money gain";
+
+            public override void ApplyUpgrade(TowerModel towerModel)
+            {
+                var attackModel = towerModel.GetAttackModel();
+                attackModel.weapons[0] = Game.instance.model.GetTowerFromId("Sauda 10").GetAttackModel().weapons[0].Duplicate();
+                towerModel.AddBehavior(new CentralMarketBuffModel("ExtraLootBuffModel_", 1.5f, "CentralMarketBuff", "CentralMarketBuff", "BuffIconBananaFarmxx4", 3));
+                towerModel.GetBehavior<RateSupportModel>().multiplier = .50f;
+                towerModel.GetBehavior<PerRoundCashBonusTowerModel>().cashPerRound = 100f;
+            }
+        }
+        public class PowerCannon : ModUpgrade<TimeTraveler>
+        {
+            public override string Portrait => "TimeTraveler-Portrait";
+            public override int Path => BOTTOM;
+            public override int Tier => 5;
+            public override int Cost => 27000;
+            public override string Description => "Gains a extra power cannon attack";
+
+            public override void ApplyUpgrade(TowerModel towerModel)
+            {
+                var attackModel = towerModel.GetAttackModel();
+                var cannon = Game.instance.model.GetTowerFromId("BombShooter-500").GetAttackModel().Duplicate();
+                cannon.range = towerModel.range;
+                cannon.name = "Cannon_Weapon";
+                towerModel.AddBehavior(cannon);
+                foreach (var attacks in towerModel.GetAttackModels())
                 {
-                    attacks.weapons[0].Rate = 1.8f;
+                    if (attacks.name.Contains("Cannon"))
+                    {
+                        attacks.weapons[0].Rate = 1.8f;
+                    }
+
                 }
 
             }
         }
     }
-}
 
